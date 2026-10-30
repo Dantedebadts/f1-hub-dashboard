@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from 'react';
-import { Star, Trophy, Award, Zap, ChevronRight } from 'lucide-react';
+import { Star, ArrowRight, User } from 'lucide-react';
 import { storage } from '../services/storage';
 
-export default function DriverCard({ driver, onClick, onFavoriteToggled }) {
+export default function DriverCard({ driver, onClick }) {
   const [isFav, setIsFav] = useState(() => storage.isFavorite(driver.id || driver.code));
 
   useEffect(() => {
@@ -19,9 +19,12 @@ export default function DriverCard({ driver, onClick, onFavoriteToggled }) {
     e.stopPropagation();
     const idToToggle = driver.id || driver.code;
     const updated = storage.toggleFavorite(idToToggle);
-    setIsFav(updated.some(item => String(item).toLowerCase() === String(idToToggle).toLowerCase()));
-    if (onFavoriteToggled) onFavoriteToggled(idToToggle);
+    setIsFav(
+      updated.some((item) => String(item).toLowerCase() === String(idToToggle).toLowerCase())
+    );
   };
+
+  const accentColor = driver.teamColour || '#E10600';
 
   return (
     <div
@@ -30,254 +33,167 @@ export default function DriverCard({ driver, onClick, onFavoriteToggled }) {
       style={{
         position: 'relative',
         overflow: 'hidden',
-        borderRadius: 'var(--radius-lg)',
-        padding: '20px',
+        borderRadius: '14px',
         display: 'flex',
         flexDirection: 'column',
         justifyContent: 'space-between',
         cursor: 'pointer',
-        transition: 'transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease',
-        border: isFav ? '1px solid rgba(255, 184, 0, 0.4)' : '1px solid var(--border-subtle)',
-        boxShadow: isFav ? '0 10px 25px rgba(255, 184, 0, 0.12)' : 'var(--shadow-card)'
-      }}
-      onMouseEnter={(e) => {
-        e.currentTarget.style.transform = 'translateY(-6px)';
-        e.currentTarget.style.boxShadow = isFav 
-          ? '0 16px 35px rgba(255, 184, 0, 0.2)' 
-          : '0 16px 35px rgba(0, 0, 0, 0.6)';
-        e.currentTarget.style.borderColor = driver.teamColour || 'rgba(255, 255, 255, 0.3)';
-      }}
-      onMouseLeave={(e) => {
-        e.currentTarget.style.transform = 'none';
-        e.currentTarget.style.boxShadow = isFav 
-          ? '0 10px 25px rgba(255, 184, 0, 0.12)' 
-          : 'var(--shadow-card)';
-        e.currentTarget.style.borderColor = isFav ? 'rgba(255, 184, 0, 0.4)' : 'var(--border-subtle)';
+        background: '#0A1222',
+        border: isFav
+          ? '1px solid rgba(255, 184, 0, 0.45)'
+          : `1px solid ${accentColor}44`,
+        transition: 'transform 0.2s ease, box-shadow 0.2s ease'
       }}
     >
-      {/* Top Stripe with Team Color */}
-      <div style={{
-        position: 'absolute',
-        top: 0,
-        left: 0,
-        right: 0,
-        height: '4px',
-        background: driver.teamColour || '#E10600'
-      }} />
-
-      {/* Header: Driver Number & Favorite Toggle */}
-      <div style={{ display: 'flex', alignItems: 'flex-start', justifyContent: 'space-between', marginBottom: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <span style={{
-            fontFamily: 'var(--font-race)',
-            fontSize: '2rem',
-            fontWeight: 900,
-            color: 'rgba(255, 255, 255, 0.85)',
-            lineHeight: 1
-          }}>
-            #{driver.driverNumber}
-          </span>
-          <span style={{
-            background: 'rgba(255, 255, 255, 0.08)',
-            padding: '3px 8px',
-            borderRadius: 'var(--radius-sm)',
-            fontFamily: 'var(--font-race)',
-            fontWeight: 800,
-            fontSize: '0.8rem',
-            color: 'var(--text-sub)'
-          }}>
-            {driver.code}
-          </span>
-        </div>
-
-        {/* Favorite Button */}
+      {/* Top Portrait Banner with Team Color Gradient */}
+      <div
+        style={{
+          position: 'relative',
+          height: '155px',
+          background: `radial-gradient(circle at 50% 35%, ${accentColor}75 0%, #0A1222 90%)`,
+          display: 'flex',
+          alignItems: 'flex-end',
+          justifyContent: 'center',
+          overflow: 'hidden'
+        }}
+      >
         <button
           onClick={handleFavoriteClick}
-          title={isFav ? "Quitar de favoritos" : "Marcar como favorito"}
+          title={isFav ? 'Quitar de favoritos' : 'Marcar como favorito'}
           style={{
-            background: isFav ? 'rgba(255, 184, 0, 0.2)' : 'rgba(255, 255, 255, 0.06)',
-            border: isFav ? '1px solid rgba(255, 184, 0, 0.6)' : '1px solid rgba(255, 255, 255, 0.1)',
-            borderRadius: 'var(--radius-full)',
-            width: '36px',
-            height: '36px',
-            display: 'flex',
-            alignItems: 'center',
-            justifyContent: 'center',
+            position: 'absolute',
+            top: '10px',
+            right: '10px',
+            zIndex: 3,
+            background: 'transparent',
+            border: 'none',
             cursor: 'pointer',
-            transition: 'all 0.2s ease',
-            color: isFav ? 'var(--f1-gold)' : 'var(--text-sub)'
-          }}
-          onMouseEnter={(e) => {
-            e.currentTarget.style.transform = 'scale(1.15)';
-          }}
-          onMouseLeave={(e) => {
-            e.currentTarget.style.transform = 'scale(1)';
+            color: isFav ? 'var(--f1-gold)' : 'rgba(255, 255, 255, 0.75)',
+            padding: '4px'
           }}
         >
-          <Star size={18} fill={isFav ? 'var(--f1-gold)' : 'none'} />
+          <Star size={19} fill={isFav ? 'var(--f1-gold)' : 'none'} />
         </button>
-      </div>
 
-      {/* Driver Portrait & Team Info */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        gap: '16px',
-        margin: '10px 0 16px 0'
-      }}>
-        <div style={{
-          position: 'relative',
-          width: '90px',
-          height: '90px',
-          borderRadius: 'var(--radius-full)',
-          background: 'linear-gradient(135deg, rgba(255,255,255,0.08) 0%, rgba(0,0,0,0.5) 100%)',
-          border: `2px solid ${driver.teamColour || 'rgba(255, 255, 255, 0.15)'}`,
-          overflow: 'hidden',
-          flexShrink: 0,
-          boxShadow: `0 4px 16px ${driver.teamColour}40`
-        }}>
+        {driver.headshotUrl ? (
           <img
             src={driver.headshotUrl}
             alt={driver.fullName}
-            onError={(e) => {
-              e.currentTarget.src = 'https://media.formula1.com/d_driver_fallback_image.png/content/dam/fom-website/drivers/driver_fallback.png';
-            }}
             style={{
-              width: '100%',
-              height: '100%',
-              objectFit: 'cover',
-              objectPosition: 'top'
+              height: '140px',
+              width: 'auto',
+              objectFit: 'contain',
+              objectPosition: 'bottom'
             }}
           />
-        </div>
-
-        <div>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', marginBottom: '2px' }}>
-            <span style={{ fontSize: '1rem' }}>{driver.flag}</span>
-            <span style={{ fontSize: '0.75rem', color: 'var(--text-sub)', textTransform: 'uppercase', letterSpacing: '0.04em' }}>
-              {driver.countryName}
-            </span>
+        ) : (
+          <div style={{ paddingBottom: '28px' }}>
+            <User size={54} color="rgba(255,255,255,0.4)" />
           </div>
+        )}
 
-          <h3 style={{
-            fontSize: '1.25rem',
-            fontWeight: 800,
+        <span
+          style={{
+            position: 'absolute',
+            bottom: '10px',
+            right: '12px',
+            background: accentColor,
             color: '#fff',
-            lineHeight: 1.2
-          }}>
-            {driver.fullName}
-          </h3>
-
-          <div style={{
-            display: 'inline-flex',
-            alignItems: 'center',
-            gap: '6px',
-            fontSize: '0.8rem',
-            color: driver.teamColour || 'var(--text-sub)',
-            fontWeight: 700,
-            marginTop: '4px'
-          }}>
-            <span style={{ width: 8, height: 8, borderRadius: '50%', background: driver.teamColour || '#E10600' }} />
-            <span>{driver.teamName}</span>
-          </div>
-        </div>
-      </div>
-
-      {/* Season Stats Pills */}
-      <div style={{
-        display: 'grid',
-        gridTemplateColumns: '1fr 1fr',
-        gap: '8px',
-        background: 'rgba(7, 10, 16, 0.55)',
-        padding: '12px',
-        borderRadius: 'var(--radius-md)',
-        border: '1px solid var(--border-subtle)',
-        marginBottom: '14px'
-      }}>
-        <div>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>
-            Puntos 2024
-          </span>
-          <strong style={{
-            fontFamily: 'var(--font-race)',
-            fontSize: '1.25rem',
-            color: 'var(--f1-cyan)',
-            fontWeight: 900
-          }}>
-            {driver.points} PTS
-          </strong>
-        </div>
-
-        <div>
-          <span style={{ fontSize: '0.7rem', color: 'var(--text-muted)', display: 'block', textTransform: 'uppercase' }}>
-            Posición General
-          </span>
-          <strong style={{
-            fontFamily: 'var(--font-race)',
-            fontSize: '1.25rem',
-            color: driver.position <= 3 ? 'var(--f1-gold)' : 'var(--text-main)',
-            fontWeight: 900
-          }}>
-            P{driver.position}
-          </strong>
-        </div>
-
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
-          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>
-            Mejor Clasificación
-          </span>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 600 }}>
-            {driver.bestQualy || '--'}
-          </span>
-        </div>
-
-        <div style={{ borderTop: '1px solid rgba(255, 255, 255, 0.05)', paddingTop: '6px' }}>
-          <span style={{ fontSize: '0.68rem', color: 'var(--text-muted)', display: 'block' }}>
-            Mejor Carrera
-          </span>
-          <span style={{ fontSize: '0.82rem', color: 'var(--text-main)', fontWeight: 600 }}>
-            {driver.bestFinish || '--'}
-          </span>
-        </div>
-      </div>
-
-      {/* Bottom Action: Recent finishes & click to details */}
-      <div style={{
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'space-between',
-        paddingTop: '8px',
-        borderTop: '1px solid var(--border-subtle)',
-        fontSize: '0.78rem'
-      }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-          <span style={{ color: 'var(--text-muted)', fontSize: '0.72rem' }}>Últimas:</span>
-          {driver.recentResults && driver.recentResults.slice(0, 4).map((res, i) => (
-            <span
-              key={i}
-              style={{
-                background: res === 'P1' ? 'var(--f1-gold)' : res.startsWith('P1') || res.startsWith('P2') || res.startsWith('P3') ? 'rgba(0, 210, 190, 0.2)' : 'rgba(255,255,255,0.06)',
-                color: res === 'P1' ? '#000' : '#fff',
-                padding: '1px 5px',
-                borderRadius: '4px',
-                fontSize: '0.7rem',
-                fontWeight: 700
-              }}
-            >
-              {res}
-            </span>
-          ))}
-        </div>
-
-        <span style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '2px',
-          color: 'var(--f1-red)',
-          fontWeight: 700
-        }}>
-          Ficha <ChevronRight size={14} />
+            fontSize: '0.64rem',
+            fontWeight: 800,
+            padding: '2px 6px',
+            borderRadius: '4px',
+            letterSpacing: '0.04em'
+          }}
+        >
+          {driver.code}
         </span>
+      </div>
+
+      {/* Bottom Driver Details */}
+      <div
+        style={{
+          padding: '14px 16px 16px',
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '6px',
+          borderTop: '1px solid rgba(255, 255, 255, 0.06)'
+        }}
+      >
+        <div style={{ display: 'flex', alignItems: 'baseline', gap: '6px' }}>
+          <strong
+            style={{
+              fontFamily: 'var(--font-race)',
+              fontSize: '1.05rem',
+              fontWeight: 800,
+              color: '#fff'
+            }}
+          >
+            {driver.driverNumber}
+          </strong>
+          <span
+            style={{
+              fontSize: '0.96rem',
+              fontWeight: 600,
+              color: '#fff',
+              whiteSpace: 'nowrap',
+              overflow: 'hidden',
+              textOverflow: 'ellipsis'
+            }}
+          >
+            {driver.fullName}
+          </span>
+        </div>
+
+        <div style={{ display: 'flex', alignItems: 'center', gap: '7px' }}>
+          <span
+            style={{
+              width: '8px',
+              height: '8px',
+              borderRadius: '50%',
+              background: accentColor,
+              flexShrink: 0
+            }}
+          />
+          <span style={{ fontSize: '0.8rem', color: 'var(--text-sub)' }}>{driver.teamName}</span>
+        </div>
+
+        <div
+          style={{
+            fontSize: '0.9rem',
+            fontWeight: 700,
+            color: '#fff',
+            marginBottom: '6px'
+          }}
+        >
+          {driver.points} pts
+        </div>
+
+        <button
+          type="button"
+          onClick={(e) => {
+            e.stopPropagation();
+            if (onClick) onClick(driver);
+          }}
+          style={{
+            width: '100%',
+            padding: '8px 12px',
+            borderRadius: '8px',
+            background: 'rgba(255, 255, 255, 0.05)',
+            border: '1px solid var(--border-subtle)',
+            color: 'var(--text-sub)',
+            fontSize: '0.78rem',
+            fontWeight: 500,
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'center',
+            gap: '6px',
+            cursor: 'pointer'
+          }}
+        >
+          <span>Ver detalles</span>
+          <ArrowRight size={13} />
+        </button>
       </div>
     </div>
   );

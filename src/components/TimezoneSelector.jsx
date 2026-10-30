@@ -1,83 +1,63 @@
 import React, { useState, useEffect } from 'react';
-import { Globe, Clock, Check } from 'lucide-react';
+import { Settings, Check } from 'lucide-react';
 import { COMMON_TIMEZONES } from '../services/dateUtils';
 import { storage } from '../services/storage';
 
 export default function TimezoneSelector({ onTimezoneChange }) {
   const [isOpen, setIsOpen] = useState(false);
-  const [currentTimezone, setCurrentTimezone] = useState(storage.getTimezone());
-  const [prefMode, setPrefMode] = useState(storage.getTimezonePreferenceMode());
-  const [liveClock, setLiveClock] = useState('');
+  const [prefMode, setPrefMode] = useState(() => storage.getTimezonePreferenceMode());
+  const [currentTimezone, setCurrentTimezone] = useState(() => storage.getTimezone());
 
-  // Update live clock every second for selected timezone
   useEffect(() => {
-    const updateTime = () => {
-      try {
-        const now = new Date();
-        const timeStr = new Intl.DateTimeFormat('es-ES', {
-          hour: '2-digit',
-          minute: '2-digit',
-          second: '2-digit',
-          hour12: false,
-          timeZone: currentTimezone
-        }).format(now);
-        setLiveClock(timeStr);
-      } catch {
-        setLiveClock('--:--:--');
+    const handleStorageChange = (e) => {
+      if (e.detail?.key === 'f1_timezone_pref') {
+        setPrefMode(storage.getTimezonePreferenceMode());
+        setCurrentTimezone(storage.getTimezone());
       }
     };
-
-    updateTime();
-    const interval = setInterval(updateTime, 1000);
-    return () => clearInterval(interval);
-  }, [currentTimezone]);
+    window.addEventListener('f1_storage_change', handleStorageChange);
+    return () => window.removeEventListener('f1_storage_change', handleStorageChange);
+  }, []);
 
   const handleSelect = (tzValue) => {
     storage.setTimezone(tzValue);
     setPrefMode(tzValue);
-    const effective = tzValue === 'auto' 
-      ? (Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC') 
-      : tzValue;
+    const effective =
+      tzValue === 'auto'
+        ? Intl.DateTimeFormat().resolvedOptions().timeZone || 'UTC'
+        : tzValue;
     setCurrentTimezone(effective);
     if (onTimezoneChange) onTimezoneChange(effective);
     setIsOpen(false);
   };
 
-  const currentLabel = COMMON_TIMEZONES.find(t => t.value === prefMode)?.label || currentTimezone;
-
   return (
     <div style={{ position: 'relative' }}>
       <button
         onClick={() => setIsOpen(!isOpen)}
-        className="btn btn-glass"
-        title="Cambiar zona horaria"
         style={{
+          width: '100%',
           display: 'flex',
           alignItems: 'center',
-          gap: '8px',
-          padding: '8px 14px',
-          fontSize: '0.82rem',
-          borderRadius: 'var(--radius-full)'
+          gap: '10px',
+          padding: '10px 14px',
+          borderRadius: 'var(--radius-md)',
+          background: isOpen ? 'rgba(255, 255, 255, 0.06)' : 'transparent',
+          border: 'none',
+          color: 'var(--text-sub)',
+          fontSize: '0.88rem',
+          fontWeight: 500,
+          cursor: 'pointer',
+          textAlign: 'left',
+          transition: 'all var(--transition-fast)'
         }}
       >
-        <Globe size={15} color="var(--f1-cyan)" />
-        <span style={{ maxWidth: '140px', overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap' }}>
-          {prefMode === 'auto' ? 'Auto: ' : ''}{currentTimezone.split('/').pop().replace(/_/g, ' ')}
-        </span>
-        <div style={{
-          display: 'flex',
-          alignItems: 'center',
-          gap: '4px',
-          background: 'rgba(0, 210, 190, 0.12)',
-          color: 'var(--f1-cyan)',
-          padding: '2px 8px',
-          borderRadius: 'var(--radius-full)',
-          fontSize: '0.75rem',
-          fontWeight: 700,
-          fontFamily: 'monospace'
-        }}>
-          <Clock size={12} />
-          {liveClock || '--:--'}
+        <Settings size={17} />
+        <div style={{ overflow: 'hidden' }}>
+          <div>Configuración</div>
+          <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>
+            {currentTimezone.split('/').pop().replace(/_/g, ' ')}
+          </div>
         </div>
       </button>
 
@@ -91,23 +71,24 @@ export default function TimezoneSelector({ onTimezoneChange }) {
             className="glass-panel"
             style={{
               position: 'absolute',
-              top: 'calc(100% + 8px)',
-              right: 0,
-              width: '320px',
-              maxHeight: '380px',
+              bottom: 'calc(100% + 8px)',
+              left: 0,
+              width: '280px',
+              maxHeight: '340px',
               overflowY: 'auto',
               padding: '10px',
               zIndex: 999,
-              boxShadow: '0 20px 40px rgba(0,0,0,0.8)',
+              background: '#0B1324',
+              boxShadow: '0 20px 40px rgba(0,0,0,0.85)',
               border: '1px solid var(--border-hover)'
             }}
           >
-            <div style={{ padding: '8px 10px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '6px' }}>
-              <div style={{ fontSize: '0.75rem', textTransform: 'uppercase', color: 'var(--text-sub)', fontWeight: 700, letterSpacing: '0.05em' }}>
-                Zona Horaria (localStorage)
+            <div style={{ padding: '6px 10px 10px', borderBottom: '1px solid var(--border-subtle)', marginBottom: '6px' }}>
+              <div style={{ fontSize: '0.78rem', fontWeight: 700, color: '#fff' }}>
+                Zona Horaria
               </div>
-              <div style={{ fontSize: '0.75rem', color: 'var(--text-muted)' }}>
-                Los horarios de carreras se ajustan a tu selección
+              <div style={{ fontSize: '0.7rem', color: 'var(--text-muted)' }}>
+                Ajusta los horarios de las sesiones
               </div>
             </div>
 
@@ -125,18 +106,11 @@ export default function TimezoneSelector({ onTimezoneChange }) {
                     padding: '8px 10px',
                     borderRadius: 'var(--radius-sm)',
                     border: 'none',
-                    background: isSelected ? 'rgba(225, 6, 0, 0.15)' : 'transparent',
-                    color: isSelected ? '#ff4d4d' : 'var(--text-main)',
-                    fontSize: '0.83rem',
+                    background: isSelected ? 'rgba(225, 6, 0, 0.18)' : 'transparent',
+                    color: isSelected ? '#fff' : 'var(--text-sub)',
+                    fontSize: '0.8rem',
                     textAlign: 'left',
-                    cursor: 'pointer',
-                    transition: 'background var(--transition-fast)'
-                  }}
-                  onMouseEnter={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'rgba(255, 255, 255, 0.06)';
-                  }}
-                  onMouseLeave={(e) => {
-                    if (!isSelected) e.currentTarget.style.background = 'transparent';
+                    cursor: 'pointer'
                   }}
                 >
                   <span>{tz.label}</span>
